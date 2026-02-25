@@ -87,6 +87,14 @@
     padding: 28px 24px;
     position: relative;
     overflow-x: hidden;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .app-wrapper {
+    width: 100%;
+    max-width: 1200px;
   }
 
   /* ─── BACKGROUND ─── */
@@ -170,7 +178,7 @@
   }
 
   .logo h1 {
-    font-size: 1.5rem;
+    font-size: 1.65rem;
     font-weight: 800;
     letter-spacing: -0.02em;
     color: var(--text);
@@ -203,14 +211,14 @@
   .stat.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(230,149,0,0.18); }
 
   .stat-num {
-    font-size: 1.3rem;
+    font-size: 1.45rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
     color: var(--accent);
   }
 
   .stat-label {
-    font-size: 0.64rem;
+    font-size: 0.7rem;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -252,7 +260,7 @@
     padding: 10px 14px 10px 40px;
     color: var(--text);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     outline: none;
     transition: border-color 0.2s;
     box-shadow: var(--shadow);
@@ -269,7 +277,7 @@
     border-radius: 10px;
     padding: 10px 16px;
     font-family: 'Syne', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s, color 0.2s, transform 0.1s;
@@ -316,12 +324,12 @@
   .add-row input#inline-plate {
     background: var(--surface);
     border: 1.5px solid var(--border);
-    border-right: none;
-    border-radius: 10px 0 0 10px;
+    border-right: 1.5px solid var(--border);
+    border-radius: 10px;
     padding: 10px 14px;
     color: var(--text);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     outline: none;
     transition: border-color 0.2s;
@@ -368,7 +376,8 @@
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 0 10px 10px 0;
+    border-radius: 10px;
+    margin-left: 10px;
     padding: 10px 20px;
     font-family: 'Syne', sans-serif;
     font-size: 0.9rem;
@@ -380,8 +389,21 @@
     height: 100%;
   }
 
-  .btn-add:hover { opacity: 0.88; }
-  .btn-add:active { transform: scale(0.97); }
+  .btn-add:hover { opacity: 0.92; box-shadow: 0 4px 16px rgba(230,149,0,0.45); transform: translateY(-1px); }
+
+  .btn-add:active { transform: scale(0.94) translateY(0px); box-shadow: 0 1px 6px rgba(230,149,0,0.3); }
+
+  .btn-add.clicked {
+    animation: btn-pop 0.35s ease forwards;
+  }
+
+  @keyframes btn-pop {
+    0%   { transform: scale(1); box-shadow: 0 2px 8px rgba(230,149,0,0.25); }
+    25%  { transform: scale(0.93); box-shadow: 0 1px 4px rgba(230,149,0,0.2); }
+    55%  { transform: scale(1.07); box-shadow: 0 6px 22px rgba(230,149,0,0.55); }
+    80%  { transform: scale(0.98); }
+    100% { transform: scale(1); box-shadow: 0 2px 8px rgba(230,149,0,0.25); }
+  }
 
   /* ─── TABLE ─── */
   .table-wrap {
@@ -407,7 +429,7 @@
   th {
     padding: 12px 14px;
     text-align: left;
-    font-size: 0.66rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -440,7 +462,7 @@
 
   .td-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--muted);
     font-weight: 600;
     width: 46px;
@@ -448,7 +470,7 @@
 
   .td-plate {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.96rem;
+    font-size: 1.02rem;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 0.04em;
@@ -457,7 +479,7 @@
 
   .td-time {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.81rem;
+    font-size: 0.86rem;
     color: #475569;
     white-space: nowrap;
   }
@@ -475,14 +497,14 @@
 
   .cell-display .cell-val {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.81rem;
+    font-size: 0.86rem;
     color: #475569;
   }
 
   .cell-display .cell-val.empty {
     color: #b0baca;
     font-style: italic;
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     font-family: 'Syne', sans-serif;
   }
 
@@ -556,7 +578,7 @@
     gap: 5px;
     padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.68rem;
+    font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -601,7 +623,7 @@
   .dur-badge {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
+    font-size: 0.83rem;
     font-weight: 700;
     padding: 3px 9px;
     border-radius: 6px;
@@ -610,7 +632,7 @@
 
   .dur-ok   { background: rgba(22,163,74,0.1);  color: #15803d; }
   .dur-over { background: rgba(239,68,68,0.1);  color: #dc2626; }
-  .dur-done { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted); }
+  .dur-done { font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; color: var(--muted); }
   .dur-na   { color: var(--muted); font-size: 0.78rem; }
 
   html.dark .dur-ok   { background: rgba(74,222,128,0.12); color: #4ade80; }
@@ -646,7 +668,7 @@
   }
 
   .modal h2 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 800;
     margin-bottom: 6px;
     color: var(--text);
@@ -655,7 +677,7 @@
   .modal h2 span { color: var(--accent); }
 
   .modal p {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--muted);
     margin-bottom: 20px;
   }
@@ -731,12 +753,13 @@
   }
 
   .empty-state .big-icon { font-size: 2.8rem; margin-bottom: 12px; }
-  .empty-state p { font-size: 0.88rem; }
+  .empty-state p { font-size: 0.94rem; }
 </style>
 </head>
 <body>
 <div class="bg-grid"></div>
 
+<div class="app-wrapper">
 <!-- HEADER -->
 <div class="header">
   <div class="logo">
@@ -851,6 +874,8 @@
     </div>
   </div>
 </div>
+
+</div><!-- /.app-wrapper -->
 
 <!-- SheetJS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1215,7 +1240,14 @@
     setTimeout(() => document.getElementById("modal-doc-input").focus(), 80);
   }
 
-  document.getElementById("inline-add-btn").addEventListener("click", doAdd);
+  const addBtn = document.getElementById("inline-add-btn");
+  addBtn.addEventListener("click", () => {
+    addBtn.classList.remove("clicked");
+    void addBtn.offsetWidth; // reflow to restart animation
+    addBtn.classList.add("clicked");
+    addBtn.addEventListener("animationend", () => addBtn.classList.remove("clicked"), { once: true });
+    doAdd();
+  });
 
   function commitAdd(docNr) {
     push(trackerRef, {
