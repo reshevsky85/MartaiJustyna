@@ -313,7 +313,7 @@
     align-items: center;
     gap: 0;
     margin-bottom: 16px;
-    width: fit-content;
+    width: 100%;
   }
 
   /* autocomplete wrapper */
@@ -756,6 +756,52 @@
   .empty-state .big-icon { font-size: 2.8rem; margin-bottom: 12px; }
   .empty-state p { font-size: 0.94rem; }
 
+
+  /* ─── QUOTE ─── */
+  .quote-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 6px;
+    flex: 1;
+  }
+
+  .quote-text {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Syne', sans-serif;
+    line-height: 1.4;
+    opacity: 0.85;
+    transition: opacity 0.4s ease;
+    max-width: 420px;
+  }
+
+  .quote-text.fade { opacity: 0; }
+
+  .quote-text::before { content: '„'; }
+  .quote-text::after  { content: '"'; }
+
+  .btn-quote-refresh {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.2s, transform 0.3s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .btn-quote-refresh:hover { color: var(--accent); }
+  .btn-quote-refresh.spin { transform: rotate(360deg); }
+
+  @media (max-width: 768px) {
+    .quote-wrap { display: none; }
+  }
+
   /* ═══════════════════════════════════════════
      MOBILE RESPONSIVE  (≤ 768px)
   ═══════════════════════════════════════════ */
@@ -988,7 +1034,12 @@
     </svg>
     Dodaj
   </button>
+  <div class="quote-wrap">
+    <span class="quote-text" id="quote-text"></span>
+    <button class="btn-quote-refresh" id="quote-refresh-btn" title="Losuj cytat">↻</button>
+  </div>
 </div>
+
 
 <!-- TABLE -->
 <div class="table-wrap">
@@ -1037,7 +1088,99 @@
 </div><!-- /.app-wrapper -->
 
 <!-- SheetJS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+  // ── Quotes ──
+  const QUOTES = [
+    "Nie ma rzeczy niemożliwych dla chcącego. — Miś",
+    "Żeby żyć, trzeba mieć kasę, jasne? A żeby mieć kasę, trzeba kombinować. — Kiler",
+    "Panie, to jest normalne, że tak nie jest. — Rejs",
+    "Co wy wiecie o miłości?! Byliście kiedyś w Krakowie?! — Kingsajz",
+    "Jak nie wiadomo o co chodzi, to chodzi o pieniądze. — Miś",
+    "Sami swoi, tylko skąd? — Sami Swoi",
+    "Grunt to spokój. — Miś",
+    "Każdy szczyt jest do zdobycia. Trzeba tylko chcieć. — Miś",
+    "Nie ma to jak wypić piwko z kumplami w środę po południu. — Kiler",
+    "Przepraszam, czy tu biją? — Rejs",
+    "Zadzwoń do mnie na pewno, to znaczy może. — Kiler",
+    "Dziękuję za zrozumienie, którego nie mam. — Rejs",
+    "Cześć! Kto tu rządzi? — Kingsajz",
+    "Co za różnica, skoro i tak wszystko jest bez sensu? — Rejs",
+    "Oni tu wszyscy są dla mnie za mali. — Kingsajz",
+    "Ja panu dam spokój! — Miś",
+    "Ryba psuje się od głowy, ale zaczyna śmierdzieć od ogona. — Sami Swoi",
+    "Panie, w tym kraju nie można normalnie żyć! — Rejs",
+    "No to co, po sprawie? — Kiler",
+    "Chłopie, my jesteśmy z innej bajki. — Kingsajz",
+    "Tego się nie da tak zostawić. — Sami Swoi",
+    "Dobry wieczór, jestem z wizytą. — Miś",
+    "Człowiek człowiekowi wilkiem, ale w rodzinie lepiej. — Sami Swoi",
+    "Ja już wszystko wiem, tylko nie rozumiem. — Rejs",
+    "Chłopaki nie płaczą. — Chłopaki nie płaczą",
+    "Nie bij, bo się przestraszę i zapomnę. — Chłopaki nie płaczą",
+    "Kurczę, ale mnie boli. Ale nie płaczę! — Chłopaki nie płaczą",
+    "Nie lubię poniedziałków. Ani wtorków. — Chłopaki nie płaczą",
+    "Ty w ogóle myślisz, zanim coś powiesz? — Chłopaki nie płaczą",
+    "Zrób coś z tą twarzą, bo zaraz zrobię to za ciebie. — Chłopaki nie płaczą",
+    "Spokojnie, bo się zdenerwuję. — Chłopaki nie płaczą",
+    "Wszystko mnie boli, ale nic mi nie jest. — Nic śmiesznego",
+    "Nie ma tego złego, co by na dobre nie wyszło... ale tym razem wyszło źle. — Nic śmiesznego",
+    "Ja się nie nadaję do życia z ludźmi. Ani bez ludzi. — Nic śmiesznego",
+    "Lubię cię, ale nie wiem za co. — Nic śmiesznego",
+    "To nie był dobry pomysł, ale był jedyny. — Nic śmiesznego",
+    "Panie, ja panu powiem szczerze — nie mam pojęcia. — Kiler",
+    "Dobra, dobra, zaraz będzie po krzyku. — Kiler",
+    "Kto nie ryzykuje, ten nie pije szampana. — Kiler",
+    "Mnie się tu podoba. Cicho, spokojnie, nikt nie strzela. — Kiler",
+    "Już nie mogę patrzeć na te same twarze, słuchać tych samych głosów... No, ale trudno. — Dzień Świra",
+    "Mam to szczęście, że jestem nieszczęśliwy tylko ja, a nie wszyscy wokół mnie. — Dzień Świra",
+    "Dlaczego ja? Dlaczego właśnie ja?! — Dzień Świra",
+    "Wstaję. Znowu ten sam sufit. — Dzień Świra",
+    "Wszystko mnie drażni. Wszystko. Nawet to, że nic mnie nie drażni. — Dzień Świra",
+    "Głupi jest ten świat. Ale żyć trzeba. — Dzień Świra",
+    "Masakra. Totalna masakra. — Dzień Świra",
+    "Nie ma mężczyzn! Jest tylko imitacja! — Seksmisja",
+    "Ciemność widzę, ciemność! — Seksmisja",
+    "Ewolucja, panowie, ewolucja! — Seksmisja",
+    "Maksy, coś ty narobił?! — Seksmisja",
+    "Tu jest lepiej. Tu jest spokojniej. Tu są kobiety. — Seksmisja",
+    "Panowie, zachowajmy zimną krew. — Seksmisja",
+    "Postęp to nie wszystko, ale bez postępu to nic. — Seksmisja",
+  ];
+
+  let lastQuoteIdx = -1;
+
+  function showQuote(animate = false) {
+    const el = document.getElementById("quote-text");
+    let idx;
+    do { idx = Math.floor(Math.random() * QUOTES.length); } while (idx === lastQuoteIdx);
+    lastQuoteIdx = idx;
+
+    if (animate) {
+      el.classList.add("fade");
+      setTimeout(() => {
+        el.textContent = QUOTES[idx];
+        el.classList.remove("fade");
+      }, 380);
+    } else {
+      el.textContent = QUOTES[idx];
+    }
+  }
+
+  showQuote(false);
+
+  const quoteRefreshBtn = document.getElementById("quote-refresh-btn");
+  quoteRefreshBtn.addEventListener("click", () => {
+    quoteRefreshBtn.classList.add("spin");
+    quoteRefreshBtn.addEventListener("transitionend", () => {
+      quoteRefreshBtn.classList.remove("spin");
+    }, { once: true });
+    showQuote(true);
+  });
+
+  // Auto-rotate every 30 seconds
+  setInterval(() => showQuote(true), 30000);
+
+</script>
 
 <!-- FIREBASE -->
 <script type="module">
@@ -1509,6 +1652,98 @@
     darkmodeBtn.textContent = isDark ? "☀️" : "🌙";
     localStorage.setItem("darkMode", isDark ? "1" : "0");
   });
+
+  // ── Quotes ──
+  const QUOTES = [
+    "Nie ma rzeczy niemożliwych dla chcącego. — Miś",
+    "Żeby żyć, trzeba mieć kasę, jasne? A żeby mieć kasę, trzeba kombinować. — Kiler",
+    "Panie, to jest normalne, że tak nie jest. — Rejs",
+    "Co wy wiecie o miłości?! Byliście kiedyś w Krakowie?! — Kingsajz",
+    "Jak nie wiadomo o co chodzi, to chodzi o pieniądze. — Miś",
+    "Sami swoi, tylko skąd? — Sami Swoi",
+    "Grunt to spokój. — Miś",
+    "Każdy szczyt jest do zdobycia. Trzeba tylko chcieć. — Miś",
+    "Nie ma to jak wypić piwko z kumplami w środę po południu. — Kiler",
+    "Przepraszam, czy tu biją? — Rejs",
+    "Zadzwoń do mnie na pewno, to znaczy może. — Kiler",
+    "Dziękuję za zrozumienie, którego nie mam. — Rejs",
+    "Cześć! Kto tu rządzi? — Kingsajz",
+    "Co za różnica, skoro i tak wszystko jest bez sensu? — Rejs",
+    "Oni tu wszyscy są dla mnie za mali. — Kingsajz",
+    "Ja panu dam spokój! — Miś",
+    "Ryba psuje się od głowy, ale zaczyna śmierdzieć od ogona. — Sami Swoi",
+    "Panie, w tym kraju nie można normalnie żyć! — Rejs",
+    "No to co, po sprawie? — Kiler",
+    "Chłopie, my jesteśmy z innej bajki. — Kingsajz",
+    "Tego się nie da tak zostawić. — Sami Swoi",
+    "Dobry wieczór, jestem z wizytą. — Miś",
+    "Człowiek człowiekowi wilkiem, ale w rodzinie lepiej. — Sami Swoi",
+    "Ja już wszystko wiem, tylko nie rozumiem. — Rejs",
+    "Chłopaki nie płaczą. — Chłopaki nie płaczą",
+    "Nie bij, bo się przestraszę i zapomnę. — Chłopaki nie płaczą",
+    "Kurczę, ale mnie boli. Ale nie płaczę! — Chłopaki nie płaczą",
+    "Nie lubię poniedziałków. Ani wtorków. — Chłopaki nie płaczą",
+    "Ty w ogóle myślisz, zanim coś powiesz? — Chłopaki nie płaczą",
+    "Zrób coś z tą twarzą, bo zaraz zrobię to za ciebie. — Chłopaki nie płaczą",
+    "Spokojnie, bo się zdenerwuję. — Chłopaki nie płaczą",
+    "Wszystko mnie boli, ale nic mi nie jest. — Nic śmiesznego",
+    "Nie ma tego złego, co by na dobre nie wyszło... ale tym razem wyszło źle. — Nic śmiesznego",
+    "Ja się nie nadaję do życia z ludźmi. Ani bez ludzi. — Nic śmiesznego",
+    "Lubię cię, ale nie wiem za co. — Nic śmiesznego",
+    "To nie był dobry pomysł, ale był jedyny. — Nic śmiesznego",
+    "Panie, ja panu powiem szczerze — nie mam pojęcia. — Kiler",
+    "Dobra, dobra, zaraz będzie po krzyku. — Kiler",
+    "Kto nie ryzykuje, ten nie pije szampana. — Kiler",
+    "Mnie się tu podoba. Cicho, spokojnie, nikt nie strzela. — Kiler",
+    "Już nie mogę patrzeć na te same twarze, słuchać tych samych głosów... No, ale trudno. — Dzień Świra",
+    "Mam to szczęście, że jestem nieszczęśliwy tylko ja, a nie wszyscy wokół mnie. — Dzień Świra",
+    "Dlaczego ja? Dlaczego właśnie ja?! — Dzień Świra",
+    "Wstaję. Znowu ten sam sufit. — Dzień Świra",
+    "Wszystko mnie drażni. Wszystko. Nawet to, że nic mnie nie drażni. — Dzień Świra",
+    "Głupi jest ten świat. Ale żyć trzeba. — Dzień Świra",
+    "Masakra. Totalna masakra. — Dzień Świra",
+    "Nie ma mężczyzn! Jest tylko imitacja! — Seksmisja",
+    "Ciemność widzę, ciemność! — Seksmisja",
+    "Ewolucja, panowie, ewolucja! — Seksmisja",
+    "Maksy, coś ty narobił?! — Seksmisja",
+    "Tu jest lepiej. Tu jest spokojniej. Tu są kobiety. — Seksmisja",
+    "Panowie, zachowajmy zimną krew. — Seksmisja",
+    "Postęp to nie wszystko, ale bez postępu to nic. — Seksmisja",
+  ];
+
+  let lastQuoteIdx = -1;
+
+  function showQuote(animate = false) {
+    const el = document.getElementById("quote-text");
+    let idx;
+    do { idx = Math.floor(Math.random() * QUOTES.length); } while (idx === lastQuoteIdx);
+    lastQuoteIdx = idx;
+
+    if (animate) {
+      el.classList.add("fade");
+      setTimeout(() => {
+        el.textContent = QUOTES[idx];
+        el.classList.remove("fade");
+      }, 380);
+    } else {
+      el.textContent = QUOTES[idx];
+    }
+  }
+
+  showQuote(false);
+
+  const quoteRefreshBtn = document.getElementById("quote-refresh-btn");
+  quoteRefreshBtn.addEventListener("click", () => {
+    quoteRefreshBtn.classList.add("spin");
+    quoteRefreshBtn.addEventListener("transitionend", () => {
+      quoteRefreshBtn.classList.remove("spin");
+    }, { once: true });
+    showQuote(true);
+  });
+
+  // Auto-rotate every 30 seconds
+  setInterval(() => showQuote(true), 30000);
+
 </script>
 </body>
 </html>
