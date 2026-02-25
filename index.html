@@ -619,6 +619,108 @@
   .badge-deleted { background: #fef2f2; color: #f87171; text-decoration: line-through; }
   .badge-deleted .badge-dot { background: #f87171; }
 
+
+  /* ─── DATE FILTER BAR ─── */
+  .date-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .date-filter-bar label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .date-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .date-input-wrap input[type="date"] {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    color-scheme: light;
+  }
+
+  html.dark .date-input-wrap input[type="date"] {
+    color-scheme: dark;
+  }
+
+  .date-input-wrap input[type="date"]:focus { border-color: var(--accent); }
+  .date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+  }
+
+  .date-sep {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .btn-date-shortcut {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    box-shadow: var(--shadow);
+  }
+
+  .btn-date-shortcut:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,149,0,0.06); }
+  .btn-date-shortcut.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .btn-date-clear {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+
+  .btn-date-clear:hover { color: var(--danger); background: rgba(239,68,68,0.07); }
+
+  .date-filter-active-label {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(230,149,0,0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .date-filter-active-label.visible { display: inline-block; }
+
   /* ─── DURATION BADGE ─── */
   .dur-badge {
     display: inline-block;
@@ -817,6 +919,23 @@
   <button class="btn-darkmode" id="darkmode-btn" title="Tryb ciemny / jasny">🌙</button>
 </div>
 
+
+<!-- DATE FILTER BAR -->
+<div class="date-filter-bar">
+  <label>📅 Filtruj po dacie:</label>
+  <div class="date-input-wrap">
+    <input type="date" id="date-from" title="Od daty" />
+    <span class="date-sep">—</span>
+    <input type="date" id="date-to" title="Do daty" />
+  </div>
+  <button class="btn-date-shortcut" id="btn-today">Dzisiaj</button>
+  <button class="btn-date-shortcut" id="btn-yesterday">Wczoraj</button>
+  <button class="btn-date-shortcut" id="btn-week">Ten tydzień</button>
+  <button class="btn-date-shortcut" id="btn-month">Ten miesiąc</button>
+  <button class="btn-date-clear" id="btn-date-clear">✕ Wyczyść</button>
+  <span class="date-filter-active-label" id="date-active-label"></span>
+</div>
+
 <!-- ADD ROW -->
 <div class="add-row">
   <div class="autocomplete-wrap">
@@ -964,6 +1083,8 @@
   // ── State ──
   let entries = {};
   let activeFilter = 'all'; // 'all' | 'inside' | 'over2h' | 'exited'
+  let dateFrom = null; // YYYY-MM-DD string or null
+  let dateTo = null;
 
   // ── Stat box filter click ──
   const filterMap = {
@@ -1005,6 +1126,12 @@
       // Search filter
       const matchesSearch = !search || e.plate.toLowerCase().includes(search) || (e.docNr || '').toLowerCase().includes(search);
 
+      // Date filter
+      const entryDate = fmtDate(e.arrival); // YYYY-MM-DD
+      let matchesDate = true;
+      if (dateFrom && entryDate < dateFrom) matchesDate = false;
+      if (dateTo   && entryDate > dateTo)   matchesDate = false;
+
       // Stat filter (don't filter out soft-deleted — show them always if "all")
       let matchesFilter = true;
       if (!e.softDeleted) {
@@ -1020,7 +1147,7 @@
         matchesFilter = (activeFilter === 'all');
       }
 
-      const visible = matchesSearch && matchesFilter;
+      const visible = matchesSearch && matchesFilter && matchesDate;
       const hasExit = !!e.exit;
       const isDeleted = !!e.softDeleted;
 
@@ -1160,6 +1287,95 @@
 
   // ── Search ──
   document.getElementById("search-input").addEventListener("input", render);
+
+  // ── Date Filter ──
+  const dateFromEl   = document.getElementById("date-from");
+  const dateToEl     = document.getElementById("date-to");
+  const activeLabel  = document.getElementById("date-active-label");
+  const shortcuts    = document.querySelectorAll(".btn-date-shortcut");
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function offsetDay(n) {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function applyDateFilter(from, to, label) {
+    dateFrom = from;
+    dateTo   = to;
+    dateFromEl.value = from || "";
+    dateToEl.value   = to   || "";
+    if (label) {
+      activeLabel.textContent = label;
+      activeLabel.classList.add("visible");
+    } else {
+      activeLabel.classList.remove("visible");
+    }
+    shortcuts.forEach(b => b.classList.remove("active"));
+    render();
+  }
+
+  function updateActiveLabelFromInputs() {
+    if (!dateFrom && !dateTo) {
+      activeLabel.classList.remove("visible");
+    } else {
+      const parts = [];
+      if (dateFrom) parts.push("od " + dateFrom);
+      if (dateTo)   parts.push("do " + dateTo);
+      activeLabel.textContent = parts.join(" ");
+      activeLabel.classList.add("visible");
+    }
+    shortcuts.forEach(b => b.classList.remove("active"));
+  }
+
+  dateFromEl.addEventListener("change", () => {
+    dateFrom = dateFromEl.value || null;
+    updateActiveLabelFromInputs();
+    render();
+  });
+
+  dateToEl.addEventListener("change", () => {
+    dateTo = dateToEl.value || null;
+    updateActiveLabelFromInputs();
+    render();
+  });
+
+  document.getElementById("btn-today").addEventListener("click", function() {
+    const t = todayStr();
+    applyDateFilter(t, t, "Dzisiaj");
+    this.classList.add("active");
+  });
+
+  document.getElementById("btn-yesterday").addEventListener("click", function() {
+    const y = offsetDay(-1);
+    applyDateFilter(y, y, "Wczoraj");
+    this.classList.add("active");
+  });
+
+  document.getElementById("btn-week").addEventListener("click", function() {
+    const now = new Date();
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+    applyDateFilter(mon.toISOString().slice(0,10), todayStr(), "Ten tydzień");
+    this.classList.add("active");
+  });
+
+  document.getElementById("btn-month").addEventListener("click", function() {
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
+    applyDateFilter(first, todayStr(), "Ten miesiąc");
+    this.classList.add("active");
+  });
+
+  document.getElementById("btn-date-clear").addEventListener("click", () => {
+    applyDateFilter(null, null, null);
+  });
+
+
 
   // ── Autocomplete suggestions ──
   const inlinePlate  = document.getElementById("inline-plate");
